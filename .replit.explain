@@ -1,0 +1,17 @@
+# Note to users of this bot:
+
+The workflow configuration in Replit is set to use Gunicorn with `main:app`,
+but our bot doesn't have a Flask app in main.py since it's a standalone
+Telegram bot.
+
+To make it work in Replit, we've created a special replit_app.py file
+that provides a simple web interface. In a real deployment using Docker,
+you would ignore this file completely.
+
+To properly run the bot outside of Replit:
+1. Use the setup.sh script
+2. Or use docker-compose up -d
+3. Or just run python main.py directly
+
+The web interface is ONLY for Replit development and should not be used
+in production!

@@ -1,76 +1,72 @@
-# Shape on Telegram
+# 🤖 Shape on Telegram
 
-A Telegram bot that connects users to their personal Shapes API. This bot allows users to interact with a Shapes language model through Telegram using their own API keys.
+A super simple Telegram bot that connects users to their personal Shapes API. Share your Shape with friends on Telegram!
 
-## Features
+## 🚀 Quick Start
 
-- Connect Telegram users to their personal Shapes API
-- Each user registers their own API key (done in private DMs for security)
-- Bot responds to mentions, replies, and direct messages
-- Stateless design - no conversation history needed
-- Simple database to store user API keys
-- OpenAI SDK compatibility
+### How to set up (for beginners)
 
-## Commands
+1. **Create a Telegram Bot:**
+   - Message [@BotFather](https://t.me/botfather) on Telegram
+   - Send `/newbot` and follow instructions
+   - **Save the token** it gives you!
 
-- `/start` - Get started with the bot
+2. **Get Your Shape:**
+   - If you don't have a Shape yet, get one at [Shapes Inc](https://shapes.inc)
+   - Note your Shape name (looks like `shapesinc/your-shape-name`)
+
+3. **Run with Docker (easiest way):**
+   - Install [Docker](https://docs.docker.com/get-docker/)
+   - Copy `.env.example` to `.env`
+   - Edit `.env` and add your Telegram token and Shape name
+   - Run: `docker-compose up -d`
+   - That's it! Your bot is running!
+
+4. **Using the Bot:**
+   - Go to your bot on Telegram
+   - Type `/start` to see instructions
+   - Each user will need to `/register` their own Shapes API key
+   - Start chatting!
+
+## ⭐ Features
+
+- Lets users connect to their Shape through Telegram 
+- Each user registers their own API key (in DM for security)
+- Bot responds to @mentions, replies, and direct messages
+- Easy to set up and share with friends
+
+## 💬 Commands
+
+- `/start` - Welcome message and instructions
 - `/help` - Show all available commands
 - `/register` - Register your Shapes API key (DM only)
-- `/wack` - Restart your Shape
+- `/wack` - Restart your Shape if it gets confused
 
-## Setup & Installation
+## 🔧 Manual Installation
 
-### Local Development
+If you don't want to use Docker:
 
-1. Clone this repository
+1. Make sure you have Python 3.11+ installed
 2. Install dependencies:
    ```
    pip install python-telegram-bot python-dotenv openai
    ```
-3. Create a `.env` file based on `.env.example`:
-   ```
-   TELEGRAM_TOKEN=your_telegram_bot_token_here
-   SHAPES_MODEL=shapesinc/shape-username
-   SHAPES_API_URL=https://api.shapes.inc/v1/
-   DB_FILE=shape_bot.db
-   ```
+3. Create a `.env` file with your information
 4. Run the bot:
    ```
    python main.py
    ```
 
-### Docker Deployment
+## 📝 Customization
 
-1. Make sure Docker and Docker Compose are installed on your system
-2. Create a `.env` file with your environment variables (same as above)
-3. Run with Docker Compose:
-   ```
-   docker-compose up -d
-   ```
+You can change the Shape model by editing the `SHAPES_MODEL` in your `.env` file - no code changes needed!
 
-## How to Get Started
+## 🛟 Need Help?
 
-1. Create a new bot via Telegram's [BotFather](https://t.me/botfather)
-2. Get your Telegram bot token and add it to `.env`
-3. Get your Shapes API key from [Shapes Inc](https://shapes.inc)
-4. Start the bot
-5. Send the `/register` command to your bot in a private message
-6. Follow the instructions to save your API key
-7. Start chatting with your Shape!
+- Check that your `.env` file has the correct information
+- Make sure your Telegram token is valid
+- Verify that users are using valid Shapes API keys
 
-## Directory Structure
+## 📄 License
 
-- `main.py` - Entry point for the bot
-- `bot.py` - Main bot logic and command handlers
-- `api_handler.py` - Handles API requests to Shapes API
-- `db.py` - Database functionality for API key storage
-- `Dockerfile` - Docker configuration
-- `docker-compose.yml` - Docker Compose configuration
-
-## Customization
-
-You can customize the Shapes model by changing the `SHAPES_MODEL` environment variable in your `.env` file without any code changes.
-
-## License
-
-MIT
+MIT - Do whatever you want with this code!

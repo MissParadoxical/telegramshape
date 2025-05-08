@@ -35,9 +35,9 @@ async def start(update: Update, context: CallbackContext) -> None:
     Handler for the /start command
     """
     await update.message.reply_text(
-        "👋 Hey there! I'm your Shapes connector bot.\n\n"
+        "👋 Hey there! Lets chat!\n\n"
         "To use me, you'll need to register your Shapes API key first.\n"
-        "Use /register to do that in a private message.\n\n"
+        "Use /register in a private message.\n\n"
         "After registering, you can use me in any chat by:\n"
         "1. Mentioning me (@shapebot your question)\n"
         "2. Replying to my messages\n"
@@ -50,12 +50,12 @@ async def help_command(update: Update, context: CallbackContext) -> None:
     Handler for the /help command
     """
     await update.message.reply_text(
-        "🔍 *Shape Bot Help*\n\n"
-        "I connect you to your Shapes API. Here's what I can do:\n\n"
-        "🔑 */register* - Register your Shapes API key (DM only)\n"
-        "🔄 */wack* - Restart your Shape\n"
+        "🔍 *Shape Help*\n\n"
+        "Here's what I can do:\n\n"
+        "🔑 */register* - Register your Shapes account (DM only)\n"
+        "🔄 */wack* - Restart your chat\n"
         "❓ */help* - Show this help message\n\n"
-        "Once you've registered your API key, you can interact with me in any chat by:\n"
+        "Once you've registered, you can interact with me in any chat by:\n"
         "- Mentioning me: @shapebot hello there\n"
         "- Replying to my messages\n"
         "- Sending me direct messages\n\n"
@@ -70,12 +70,12 @@ async def register_command(update: Update, context: CallbackContext) -> int:
     # Only allow registration in private chats
     if update.effective_chat.type != "private":
         await update.message.reply_text(
-            "🔒 For security reasons, please send me a direct message to register your API key."
+            "🔒 For security reasons, please send me a direct message to register."
         )
         return ConversationHandler.END
     
     await update.message.reply_text(
-        "🔑 Please send me your Shapes API key.\n\n"
+        "🔑 Please send me your Shapes account wide API key from https://shapes.inc/developer.\n\n"
         "I'll store it securely to connect you to your Shape.\n"
         "You can cancel anytime with /cancel."
     )
@@ -100,7 +100,7 @@ async def process_api_key(update: Update, context: CallbackContext) -> int:
     store_api_key(user_id, api_key)
     
     await update.message.reply_text(
-        "✅ Your API key has been registered successfully!\n\n"
+        "✅ You have been registered successfully!\n\n"
         "You can now use me in any chat by:\n"
         "- Mentioning me\n"
         "- Replying to my messages\n"
@@ -127,8 +127,8 @@ async def wack_command(update: Update, context: CallbackContext) -> None:
     
     if not api_key:
         await update.message.reply_text(
-            "❌ You don't have an API key registered yet.\n"
-            "Please use /register to set up your key first."
+            "❌ You are not registered yet.\n"
+            "Please use /register in my Dms to set up your key first."
         )
         return
     
@@ -150,8 +150,8 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
     api_key = get_api_key(user_id)
     if not api_key:
         await update.message.reply_text(
-            "❌ You don't have an API key registered yet.\n"
-            "Please use /register to set up your key first."
+            "❌ You are not registered yet.\n"
+            "Please use /register in my DMs to set up your key first."
         )
         return
     
