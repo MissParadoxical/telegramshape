@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  shape_bot:
+    build: .
+    container_name: telegram_shape_bot
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+    environment:
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - SHAPES_MODEL=${SHAPES_MODEL:-shapesinc/shape-username}
+      - SHAPES_API_URL=${SHAPES_API_URL:-https://api.shapes.inc/v1/}
+      - DB_FILE=data/shape_bot.db

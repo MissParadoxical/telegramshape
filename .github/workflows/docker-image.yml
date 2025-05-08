@@ -1,0 +1,28 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag telegram-shape-bot:$(date +%s)
+      
+    - name: Run basic tests
+      run: |
+        if [ ! -f "main.py" ]; then
+          echo "main.py not found!"
+          exit 1
+        fi
+        if [ ! -f "bot.py" ]; then
+          echo "bot.py not found!"
+          exit 1
+        fi
