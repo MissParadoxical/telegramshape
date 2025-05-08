@@ -66,7 +66,7 @@ If you don't want to use Docker:
 
 ## 📝 Customization
 
-You can change the Shape model by editing the `SHAPES_MODEL` in your `.env` file - no code changes needed!
+You can chose the Shape by editing the `SHAPES_MODEL` in your `.env` file!
 
 ## 🛟 Need Help?
 
