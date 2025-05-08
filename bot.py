@@ -158,11 +158,26 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
     # Get the message text
     message_text = update.message.text
     
-    # If this is a group chat and the bot was mentioned, remove the mention
-    if update.effective_chat.type != "private" and context.bot.username:
-        # Pattern to match @botusername with or without a space after
-        bot_mention_pattern = rf'@{context.bot.username}\s*'
-        message_text = re.sub(bot_mention_pattern, '', message_text, flags=re.IGNORECASE)
+    # In group chats, verify this message is actually for this bot
+    if update.effective_chat.type != "private":
+        # Get the bot's username
+        bot_username = context.bot.username
+        
+        # Check if this is a mention or a reply
+        is_mention = bot_username and f"@{bot_username}" in message_text
+        is_reply_to_bot = (update.message.reply_to_message and 
+                          update.message.reply_to_message.from_user and
+                          update.message.reply_to_message.from_user.id == context.bot.id)
+        
+        # Only process if it's a direct mention of this bot or a reply to this bot's message
+        if not is_mention and not is_reply_to_bot:
+            logger.info("Ignoring message in group chat that isn't for this bot")
+            return
+        
+        # If it's a mention, remove the bot's username from the message
+        if is_mention and bot_username:
+            bot_mention_pattern = rf'@{bot_username}\s*'
+            message_text = re.sub(bot_mention_pattern, '', message_text, flags=re.IGNORECASE)
     
     # Process the message with the Shapes API
     response = process_message(message_text, api_key)
@@ -197,17 +212,17 @@ def run_bot():
     application.add_handler(CommandHandler("wack", wack_command))
     application.add_handler(conv_handler)
     
-    # Message handlers
+    # Message handlers for different scenarios
+    
+    # 1. Direct messages in private chat
     application.add_handler(MessageHandler(
         (filters.TEXT & ~filters.COMMAND & filters.ChatType.PRIVATE), 
         handle_message
     ))
+    
+    # 2. Messages in group chats - we'll do additional filtering in the handler
     application.add_handler(MessageHandler(
-        (filters.TEXT & filters.Entity("mention") & ~filters.COMMAND), 
-        handle_message
-    ))
-    application.add_handler(MessageHandler(
-        (filters.TEXT & ~filters.COMMAND & filters.ChatType.GROUPS & filters.REPLY), 
+        (filters.TEXT & ~filters.COMMAND & filters.ChatType.GROUPS), 
         handle_message
     ))
     

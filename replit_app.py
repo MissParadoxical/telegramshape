@@ -8,6 +8,7 @@ When deploying outside Replit with Docker, this file is ignored.
 import os
 import threading
 import logging
+import time
 from flask import Flask, render_template_string
 
 # Set up logging
@@ -108,13 +109,17 @@ def start_bot_thread():
     logger.info("Starting the Telegram bot in a background thread")
     import main
     try:
+        # Give the thread time to initialize
+        time.sleep(1)
+        
         # Actually start the bot
         main.start_bot()
     except Exception as e:
         logger.error(f"Error starting bot: {str(e)}")
 
 # Initialize the bot thread when the Flask app starts
-threading.Thread(target=start_bot_thread, daemon=True).start()
+bot_thread = threading.Thread(target=start_bot_thread, daemon=True)
+bot_thread.start()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
