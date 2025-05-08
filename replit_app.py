@@ -104,10 +104,14 @@ def health():
 # This is just a placeholder - in Replit testing mode, we don't actually
 # connect to the Telegram API since we don't want to expose API keys
 def start_bot_thread():
-    """Simulated bot startup for Replit"""
-    logger.info("Bot would start here in a real deployment")
-    # We don't actually start the bot in Replit environment
-    pass
+    """Start the bot in a thread"""
+    logger.info("Starting the Telegram bot in a background thread")
+    import main
+    try:
+        # Actually start the bot
+        main.start_bot()
+    except Exception as e:
+        logger.error(f"Error starting bot: {str(e)}")
 
 # Initialize the bot thread when the Flask app starts
 threading.Thread(target=start_bot_thread, daemon=True).start()

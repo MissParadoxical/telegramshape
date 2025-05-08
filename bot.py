@@ -213,4 +213,32 @@ def run_bot():
     
     # Start the bot
     logger.info("Starting the bot...")
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    
+    # When running in a thread from Flask, we need to use asyncio properly
+    import asyncio
+    import threading
+    
+    # Check if we're in the main thread or a child thread
+    if threading.current_thread() is threading.main_thread():
+        # In main thread, we can just run it directly
+        application.run_polling(allowed_updates=Update.ALL_TYPES)
+    else:
+        # In a child thread, we need to create and run a new event loop
+        try:
+            logger.info("Starting bot in a new event loop...")
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            # Define the async functions to run
+            async def start_application():
+                await application.initialize()
+                await application.updater.start_polling()
+                await application.start()
+                logger.info("Bot is now polling for updates...")
+                
+            # Run the async function in the event loop
+            loop.run_until_complete(start_application())
+            loop.run_forever()
+        except Exception as e:
+            logger.error(f"Error running bot: {str(e)}")
+            raise

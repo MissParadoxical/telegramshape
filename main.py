@@ -40,15 +40,12 @@ def start_bot():
     print("Starting Shape on Telegram Bot")
     print("=" * 50)
     
-    if IN_REPLIT:
-        logger.info("Running in Replit environment - bot not actually started")
-        logger.info("Use the web interface for demonstration purposes only")
-        # In Replit, the bot isn't actually started to avoid API key issues
-    else:
-        logger.info("Starting bot in production mode")
-        # Import and start the bot in production environments
-        from bot import run_bot
-        run_bot()
+    # Always start the actual bot regardless of environment
+    # since you want to test it directly in Replit
+    logger.info("Starting bot in production mode")
+    # Import and start the bot
+    from bot import run_bot
+    run_bot()
     
 if __name__ == "__main__":
     start_bot()

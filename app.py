@@ -72,9 +72,9 @@ bot_thread = None
 def start_bot():
     """Start the Telegram bot"""
     logging.info("Starting bot from app.py")
-    # In Replit, we just log that the bot would start
-    # but don't actually connect to Telegram API
-    logging.info("Bot would connect to Telegram API in production environment")
+    # Actually start the bot
+    import main
+    main.start_bot()
 
 if __name__ == '__main__':
     # Start the bot in a background thread

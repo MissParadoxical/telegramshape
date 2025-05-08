@@ -35,3 +35,23 @@ data/
 .vscode/
 *.swp
 *.swo
+
+# Replit-specific files (useless for GitHub)
+.replit
+.replit.explain
+replit_app.py
+app.py
+.github/
+uv.lock
+pyproject.toml
+.breakpoints
+poetry.lock
+
+# Test files created for Replit testing
+test_*.py
+simple_test.py
+
+# Replit workflow files
+.replit/
+.config/
+.cache/
