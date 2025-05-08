@@ -1,13 +1,20 @@
 import os
 import logging
 from openai import OpenAI
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
 # Get the model name from environment variables with a default fallback
-SHAPES_MODEL = os.environ.get("SHAPES_MODEL", "shapesinc/shape-username")
+SHAPES_MODEL = os.environ.get("SHAPES_MODEL", "shapesinc/izuku-4oor")
 SHAPES_API_URL = os.environ.get("SHAPES_API_URL", "https://api.shapes.inc/v1/")
+
+# Log the model we're using for debugging
+logger.info(f"Configured to use Shapes model: {SHAPES_MODEL}")
 
 def process_message(message_text, api_key):
     """
