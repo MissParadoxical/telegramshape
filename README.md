@@ -10,16 +10,16 @@ Share your Shape with friends on Telegram!
    - **[View Guide](https://docs.google.com/presentation/d/1-X-XIS3NiJPGThSGgoLfJLk6eKdniyT45ubaR8WmOyM/edit?usp=sharing)**
    - Message [@BotFather](https://t.me/botfather) on Telegram
    - Send `/newbot` and follow instructions
-   - **Save the token** it gives you!
+   - **Save the token** it gives you as TELEGRAM_TOKEN in your .env file!
 
-3. **Get Your Shape:**
+3. **Get Your Shape model:**
    - If you don't have a Shape yet, get one at [Shapes Inc](https://shapes.inc)
-   - Note your Shape name (looks like `shapesinc/your-shape-name`)
+   - Note your Shape model (looks like `shapesinc/your-shape-name`)
 
 4. **Run with Docker (easiest way):**
    - Install [Docker](https://docs.docker.com/get-docker/)
    - Copy `.env.example` to `.env`
-   - Edit `.env` and add your Telegram token and Shape name
+   - Edit `.env` and add your Telegram token and Shape model
    - Run: `docker-compose up -d`
    - That's it! Your bot is running!
 
