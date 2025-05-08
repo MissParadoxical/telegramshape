@@ -1,19 +1,20 @@
 import os
 import logging
 import re
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
     MessageHandler,
     filters,
     CallbackContext,
-    ConversationHandler
+    ConversationHandler,
+    CallbackQueryHandler
 )
 from dotenv import load_dotenv
 
 from db import init_db, store_api_key, get_api_key, delete_api_key
-from api_handler import process_message, send_wack
+from api_handler import process_message, send_wack, send_sleep, send_reset, send_imagine
 
 # Load environment variables from .env file
 load_dotenv()
@@ -29,6 +30,7 @@ if not TELEGRAM_TOKEN:
 
 # Conversation states
 AWAITING_API_KEY = 1
+AWAITING_IMAGINE_PROMPT = 2
 
 async def start(update: Update, context: CallbackContext) -> None:
     """
@@ -42,6 +44,7 @@ async def start(update: Update, context: CallbackContext) -> None:
         "1. Mentioning me (@shapebot your question)\n"
         "2. Replying to my messages\n"
         "3. DMing me directly\n\n"
+        "You can also use /imagine to generate images based on your descriptions!\n\n"
         "Type /help for more info."
     )
 
@@ -54,12 +57,15 @@ async def help_command(update: Update, context: CallbackContext) -> None:
         "Here's what I can do:\n\n"
         "🔑 */register* - Register your Shapes account (DM only)\n"
         "🔄 */wack* - Restart your chat\n"
+        "💤 */sleep* - Save a memory\n"
+        "🗑️ */reset* - Delete all long-term memories (with confirmation)\n"
+        "🖼️ */imagine* - Generate an image from a description\n"
         "❓ */help* - Show this help message\n\n"
         "Once you've registered, you can interact with me in any chat by:\n"
         "- Mentioning me: @shapebot hello there\n"
         "- Replying to my messages\n"
         "- Sending me direct messages\n\n"
-        "Remember: Each message is processed independently - I don't keep conversation history.",
+        "Remember: To have fun!",
         parse_mode="Markdown"
     )
 
@@ -139,6 +145,139 @@ async def wack_command(update: Update, context: CallbackContext) -> None:
     
     await update.message.reply_text(response or "✅ Shape restarted successfully!")
 
+async def sleep_command(update: Update, context: CallbackContext) -> None:
+    """
+    Handle the /sleep command to save a memory
+    """
+    user_id = update.effective_user.id
+    api_key = get_api_key(user_id)
+    
+    if not api_key:
+        await update.message.reply_text(
+            "❌ You are not registered yet.\n"
+            "Please use /register in my Dms to set up your key first."
+        )
+        return
+    
+    await update.message.reply_text("💤 Sending !sleep to save a memory...")
+    
+    # Send the !sleep command
+    response = send_sleep(api_key)
+    
+    await update.message.reply_text(response or "✅ Memory saved successfully!")
+
+# Define callback data
+RESET_CONFIRM = "reset_confirm"
+RESET_CANCEL = "reset_cancel"
+
+async def reset_command(update: Update, context: CallbackContext) -> None:
+    """
+    Handle the /reset command to delete all long term memories
+    """
+    user_id = update.effective_user.id
+    api_key = get_api_key(user_id)
+    
+    if not api_key:
+        await update.message.reply_text(
+            "❌ You are not registered yet.\n"
+            "Please use /register in my Dms to set up your key first."
+        )
+        return
+    
+    # Create confirmation buttons
+    keyboard = [
+        [
+            InlineKeyboardButton("⚠️ Yes, delete all memories", callback_data=RESET_CONFIRM),
+            InlineKeyboardButton("Cancel", callback_data=RESET_CANCEL),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        "⚠️ *WARNING*: This will delete ALL long term memories from your Shape.\n\n"
+        "Are you sure you want to proceed?",
+        reply_markup=reply_markup,
+        parse_mode="Markdown"
+    )
+
+async def reset_button_callback(update: Update, context: CallbackContext) -> None:
+    """
+    Handle reset confirmation button callbacks
+    """
+    query = update.callback_query
+    await query.answer()
+    
+    # Get the callback data
+    data = query.data
+    user_id = query.from_user.id
+    api_key = get_api_key(user_id)
+    
+    if data == RESET_CANCEL:
+        await query.edit_message_text("🛑 Reset cancelled. Your memories are safe.")
+        return
+    
+    if data == RESET_CONFIRM:
+        await query.edit_message_text("🔄 Processing !reset command...")
+        
+        # Send the !reset command
+        response = send_reset(api_key)
+        
+        await query.message.reply_text(response or "✅ All long term memories have been deleted.")
+
+async def imagine_command(update: Update, context: CallbackContext) -> int:
+    """
+    Start the image generation process
+    """
+    user_id = update.effective_user.id
+    api_key = get_api_key(user_id)
+    
+    if not api_key:
+        await update.message.reply_text(
+            "❌ You are not registered yet.\n"
+            "Please use /register in my DMs to set up your key first."
+        )
+        return ConversationHandler.END
+    
+    await update.message.reply_text(
+        "🖼️ Let's create an image! What would you like me to imagine?\n\n"
+        "Please describe the image in detail. You can cancel anytime with /cancel."
+    )
+    return AWAITING_IMAGINE_PROMPT
+
+async def process_imagine_prompt(update: Update, context: CallbackContext) -> int:
+    """
+    Process the image description and send it to the API
+    """
+    user_id = update.effective_user.id
+    api_key = get_api_key(user_id)
+    prompt = update.message.text.strip()
+    
+    # Check if the prompt is too short
+    if len(prompt) < 3:
+        await update.message.reply_text(
+            "⚠️ Please provide a more detailed description."
+        )
+        return AWAITING_IMAGINE_PROMPT
+    
+    await update.message.reply_text("🎨 Creating your image, please wait...")
+    
+    # Send the !imagine command with the user's prompt
+    response = send_imagine(api_key, prompt)
+    
+    # Send the response back to the user
+    await update.message.reply_text(response or "✅ Image created!")
+    
+    return ConversationHandler.END
+
+async def cancel_imagine(update: Update, context: CallbackContext) -> int:
+    """
+    Cancel the image generation process
+    """
+    await update.message.reply_text(
+        "🚫 Image creation cancelled."
+    )
+    return ConversationHandler.END
+
 async def handle_message(update: Update, context: CallbackContext) -> None:
     """
     Process incoming messages that should be sent to the Shape
@@ -196,7 +335,7 @@ def run_bot():
     application = Application.builder().token(TELEGRAM_TOKEN).build()
     
     # Add conversation handler for registration
-    conv_handler = ConversationHandler(
+    registration_handler = ConversationHandler(
         entry_points=[CommandHandler('register', register_command)],
         states={
             AWAITING_API_KEY: [
@@ -206,11 +345,26 @@ def run_bot():
         fallbacks=[CommandHandler('cancel', cancel_registration)]
     )
     
+    # Add conversation handler for imagine
+    imagine_handler = ConversationHandler(
+        entry_points=[CommandHandler('imagine', imagine_command)],
+        states={
+            AWAITING_IMAGINE_PROMPT: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, process_imagine_prompt)
+            ],
+        },
+        fallbacks=[CommandHandler('cancel', cancel_imagine)]
+    )
+    
     # Add handlers
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("wack", wack_command))
-    application.add_handler(conv_handler)
+    application.add_handler(CommandHandler("sleep", sleep_command))
+    application.add_handler(CommandHandler("reset", reset_command))
+    application.add_handler(CallbackQueryHandler(reset_button_callback, pattern=f"^{RESET_CONFIRM}$|^{RESET_CANCEL}$"))
+    application.add_handler(registration_handler)
+    application.add_handler(imagine_handler)
     
     # Message handlers for different scenarios
     
